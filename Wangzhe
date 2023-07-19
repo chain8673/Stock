@@ -11,17 +11,18 @@ headers = {
 }
 
 # 将浏览器隐藏
-option = webdriver.ChromeOptions()
+option = webdriver.EdgeOptions()
 # option.add_argument('headless')  # 设置option
 option.add_argument(
     'user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')
-browser = webdriver.Chrome(options=option)
+browser = webdriver.Edge(options=option)
 browser.maximize_window()
 list_ids = []
 list_ids_sh = []
 list_ids_sz = []
 list_ids_bj = []
 list_good_ids = []
+key_vol = 30
 
 
 def get_stock_ids(url, headers):
@@ -33,47 +34,116 @@ def get_stock_ids(url, headers):
     # 获取上海股市股票ID
     sh = browser.find_element(By.LINK_TEXT, u'上证A股')
     browser.execute_script("arguments[0].click();", sh)
-    sleep(1.5)
+    sleep(1)
     page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,1200)")
+    browser.execute_script("window.scrollTo(0,300)")
     for i in range(1, page_count):
         for j in range(0, 20):
+            # 如果成交量小于30万，则该股票跳过
+            vol = browser.find_element(By.XPATH,
+                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
+                                           j + 1) + ']/td[8]').text
+            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
+                j + 1) + ']/td[6]/span').text
+            if ((vol[-1] != '万') and (vol[-1] != '亿')):
+                continue
+            vol_t = float(vol[0:(len(vol) - 1)])
+            if (vol_t < key_vol):
+                continue
             tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
             stock_id = browser.find_element(By.XPATH, tr_url).text
+            if (change_rate == '-'):
+                continue
+            if (change_rate == '0.00%'):
+                break
             list_ids_sh.append(stock_id)
+            print(stock_id)
+            print('今日涨幅：' + change_rate)
+            print('成交量：' + vol)
+            print('-----------------------------------------------------')
+        if (change_rate == '-'):
+            continue
+        if (change_rate == '0.00%'):
+            break
         e = browser.find_element(By.LINK_TEXT, u'下一页')
         browser.execute_script("arguments[0].click();", e)
-        sleep(1.5)
+        sleep(1)
 
     # 获取深圳股市股票ID
     sz = browser.find_element(By.LINK_TEXT, u'深证A股')
     browser.execute_script("arguments[0].click();", sz)
-    sleep(1.5)
+    sleep(1)
     page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,1200)")
+    browser.execute_script("window.scrollTo(0,300)")
     for i in range(1, page_count):
         for j in range(0, 20):
+            # 如果成交量小于30万，则该股票跳过
+            vol = browser.find_element(By.XPATH,
+                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
+                                           j + 1) + ']/td[8]').text
+            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
+                j + 1) + ']/td[6]/span').text
+            if ((vol[-1] != '万') and (vol[-1] != '亿')):
+                continue
+            vol_t = float(vol[0:(len(vol) - 1)])
+            if (vol_t < key_vol):
+                continue
             tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
             stock_id = browser.find_element(By.XPATH, tr_url).text
+            if (change_rate == '-'):
+                continue
+            if (change_rate == '0.00%'):
+                break
             list_ids_sz.append(stock_id)
+            print(stock_id)
+            print('今日涨幅：' + change_rate)
+            print('成交量：' + vol)
+            print('-----------------------------------------------------')
+        if (change_rate == '-'):
+            continue
+        if (change_rate == '0.00%'):
+            break
         e = browser.find_element(By.LINK_TEXT, u'下一页')
         browser.execute_script("arguments[0].click();", e)
-        sleep(1.5)
+        sleep(1)
 
     # 获取北京股市股票ID
     bj = browser.find_element(By.LINK_TEXT, u'北证A股')
     browser.execute_script("arguments[0].click();", bj)
-    sleep(1.5)
+    sleep(1)
     page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,1200)")
+    browser.execute_script("window.scrollTo(0,300)")
     for i in range(1, page_count):
         for j in range(0, 20):
+            # 如果成交量小于30万，则该股票跳过
+            vol = browser.find_element(By.XPATH,
+                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
+                                           j + 1) + ']/td[8]').text
+            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
+                j + 1) + ']/td[6]/span').text
+            if ((vol[-1] != '万') and (vol[-1] != '亿')):
+                continue
+            vol_t = float(vol[0:(len(vol) - 1)])
+            if (vol_t < key_vol):
+                continue
             tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
             stock_id = browser.find_element(By.XPATH, tr_url).text
+            if (change_rate == '-'):
+                continue
+            if (change_rate == '0.00%'):
+                break
             list_ids_bj.append(stock_id)
+            print(stock_id)
+            print('今日涨幅：' + change_rate)
+            print('成交量：' + vol)
+            print('-----------------------------------------------------')
+        if (change_rate == '-'):
+            continue
+        if (change_rate == '0.00%'):
+            break
         e = browser.find_element(By.LINK_TEXT, u'下一页')
         browser.execute_script("arguments[0].click();", e)
-        sleep(1.5)
+        sleep(1)
     list_ids.append(list_ids_sh)
     list_ids.append(list_ids_sz)
     list_ids.append(list_ids_bj)
@@ -81,76 +151,84 @@ def get_stock_ids(url, headers):
 
 
 def get_good_ids(list_ids):
+    list_final = []
     list_ids_sh = list_ids[0]
     list_ids_sz = list_ids[1]
     list_ids_bj = list_ids[2]
-    for i in list_ids_bj:
-        browser.get("https://finance.sina.com.cn/realstock/company/bj" + str(i) + "/nc.shtml")
-        # close_btn = browser.find_element(By.ID, 'close_btn')
-        # if (close_btn):
-        #     browser.execute_script("arguments[0].click();", close_btn)
+
+    for i in list_ids_sh:
+        browser.get("https://finance.sina.com.cn/realstock/company/sh" + str(i) + "/nc.shtml")
+        if (browser.find_element(By.ID, 'close_btn')):
+            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
         wait = WebDriverWait(browser, 3)
         wait.until(EC.presence_of_element_located(
             (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
+        browser.execute_script("window.scrollTo(0,300)")
         e = browser.find_element(By.LINK_TEXT, u'日K')
         browser.execute_script("arguments[0].click();", e)
         sleep(1)
+        list_final.append(i)
 
-        # 判断量柱是否为红色，如果不是则跳过
-        start = browser.find_element(By.XPATH,
-                                     '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[2]/span[2]').text
-        end = browser.find_element(By.XPATH,
-                                   '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[2]/span[6]').text
-        start = float(start)
-        end = float(end)
-        print(start)
-        print(end)
-        if ((end - start) < 0):
-            continue
+    for i in list_ids_sz:
+        browser.get("https://finance.sina.com.cn/realstock/company/sz" + str(i) + "/nc.shtml")
+        if (browser.find_element(By.ID, 'close_btn')):
+            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
+        wait = WebDriverWait(browser, 3)
+        wait.until(EC.presence_of_element_located(
+            (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
+        browser.execute_script("window.scrollTo(0,300)")
+        e = browser.find_element(By.LINK_TEXT, u'日K')
+        browser.execute_script("arguments[0].click();", e)
+        sleep(1)
+        list_final.append(i)
 
+    for i in list_ids_bj:
+        browser.get("https://finance.sina.com.cn/realstock/company/bj" + str(i) + "/nc.shtml")
+        if (browser.find_element(By.ID, 'close_btn')):
+            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
+        wait = WebDriverWait(browser, 3)
+        wait.until(EC.presence_of_element_located(
+            (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
+        browser.execute_script("window.scrollTo(0,300)")
+        e = browser.find_element(By.LINK_TEXT, u'日K')
+        browser.execute_script("arguments[0].click();", e)
+        sleep(1)
+        list_final.append(i)
         # 判断MACD两天之内是否出现金叉
-        dif_0 = browser.find_element(By.XPATH,
-                                     '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
-        dif_0 = float(dif_0[5:])
-        dea_0 = browser.find_element(By.XPATH,
-                                     '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
-        dea_0 = float(dea_0[5:])
-        print(dif_0)
-        print(dea_0)
-        vol_map = browser.find_element(By.XPATH,
-                                       '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')
-        vol_map_width = vol_map.size.get("width")
-        vol_map_x = vol_map.location.get('x')
-        vol_map_y = vol_map.location.get('y')
-        vol_map_right = vol_map_x + vol_map_width
-        # close_btn = browser.find_element(By.XPATH, '//*[@id="tkChart_wwybj871694"]/div[6]/div[1]/div/button')
-        # if (close_btn):
-        #     browser.execute_script("arguments[0].click();", close_btn)
-        dif_1 = browser.find_element(By.XPATH,
-                                     '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
-        dif_1 = float(dif_1[5:])
-        dea_1 = browser.find_element(By.XPATH,
-                                     '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
-        dea_1 = float(dea_1[5:])
-        browser.execute_script("arguments[0].scrollIntoView();", browser.find_element(By.XPATH,
-                                                                                      '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[3]'))
-        ActionChains(browser).move_to_element(vol_map)
-        # while ((dif_0 == dif_1) and (dea_0 == dea_1)):
-        #     vol_map_right -= 100
-        #     ActionChains(browser).move_by_offset(vol_map_right, vol_map_y + 10)
-        #     dif_1 = browser.find_element(By.XPATH,
-        #                                  '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
-        #     dif_1 = float(dif_1[5:])
-        #     dea_1 = browser.find_element(By.XPATH,
-        #                                  '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
-        #     dea_1 = float(dea_1[5:])
-    print("OK!!!")
-    return list_good_ids
+        # dif_0 = browser.find_element(By.XPATH,
+        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
+        # dif_0 = float(dif_0[5:])
+        # dea_0 = browser.find_element(By.XPATH,
+        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
+        # dea_0 = float(dea_0[5:])
+        # vol_map = browser.find_element(By.XPATH,
+        #                                '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')
+        # vol_map_width = vol_map.size.get("width")
+        # vol_map_x = vol_map.location.get('x')
+        # vol_map_y = vol_map.location.get('y')
+        # vol_map_right = vol_map_x + vol_map_width
+        # dif_1 = browser.find_element(By.XPATH,
+        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
+        # dif_1 = float(dif_1[5:])
+        # dea_1 = browser.find_element(By.XPATH,
+        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
+        # dea_1 = float(dea_1[5:])
+        # browser.execute_script("arguments[0].scrollIntoView();", browser.find_element(By.XPATH,
+        #                                                                               '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[3]'))
+        # ActionChains(browser).move_to_element(vol_map)
+    return list_final
 
 
 if __name__ == '__main__':
-    list_ids = get_stock_ids(url, headers=headers)
+    list_good_ids = get_stock_ids(url, headers=headers)
     # list_ids = [['600719', '600313', '601567', '601116', '603029', '603215', '600257', '688327', '600239', '688103'],
     #             ['301292', '300780', '301192', '301016', '301398', '300879', '300270', '301298', '300817', '300189'],
     #             ['871694', '831087', '836077', '838670', '430510', '834033', '873223', '836208', '832225', '832419']]
-    list_good_ids = get_good_ids(list_ids)
+    # list_good_ids = get_good_ids(list_ids)
+    print('上交合格的票有' + str(len(list_good_ids[0])) + '支，它们是：')
+    print(list_good_ids[0])
+    print('深交所合格的票有' + str(len(list_good_ids[1])) + '支，它们是：')
+    print(list_good_ids[1])
+    print('北交所合格的票有' + str(len(list_good_ids[2])) + '支，它们是：')
+    print(list_good_ids[2])
+    print('今天合格的股票共有' + str(len(list_good_ids[0]) + len(list_good_ids[1]) + len(list_good_ids[2])) + '支')
