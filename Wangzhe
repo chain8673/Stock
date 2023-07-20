@@ -18,136 +18,79 @@ option.add_argument(
 browser = webdriver.Edge(options=option)
 browser.maximize_window()
 list_ids = []
-list_ids_sh = []
-list_ids_sz = []
-list_ids_bj = []
 list_good_ids = []
 key_vol = 30
+key_change_hand_rate = 3
+city_names = ['shanghai', 'shenzhen', 'beijing']
+file_path = 'D:\\Stock.txt'
 
 
-def get_stock_ids(url, headers):
+def get_stock_ids(url):
     browser.get(url)
     wait = WebDriverWait(browser, 5)  # 验证10秒之内，browser是否执行完成
     wait.until(EC.presence_of_element_located(
         (By.XPATH, '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/thead/tr')))  # 等等ID为odds的元素出现
-
-    # 获取上海股市股票ID
-    sh = browser.find_element(By.LINK_TEXT, u'上证A股')
-    browser.execute_script("arguments[0].click();", sh)
-    sleep(1)
-    page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,300)")
-    for i in range(1, page_count):
-        for j in range(0, 20):
-            # 如果成交量小于30万，则该股票跳过
-            vol = browser.find_element(By.XPATH,
-                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
-                                           j + 1) + ']/td[8]').text
-            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
-                j + 1) + ']/td[6]/span').text
-            if ((vol[-1] != '万') and (vol[-1] != '亿')):
-                continue
-            vol_t = float(vol[0:(len(vol) - 1)])
-            if (vol_t < key_vol):
-                continue
-            tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
-            stock_id = browser.find_element(By.XPATH, tr_url).text
-            if (change_rate == '-'):
-                continue
-            if (change_rate == '0.00%'):
-                break
-            list_ids_sh.append(stock_id)
-            print(stock_id)
-            print('今日涨幅：' + change_rate)
-            print('成交量：' + vol)
-            print('-----------------------------------------------------')
-        if (change_rate == '-'):
-            continue
-        if (change_rate == '0.00%'):
-            break
-        e = browser.find_element(By.LINK_TEXT, u'下一页')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-
-    # 获取深圳股市股票ID
-    sz = browser.find_element(By.LINK_TEXT, u'深证A股')
-    browser.execute_script("arguments[0].click();", sz)
-    sleep(1)
-    page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,300)")
-    for i in range(1, page_count):
-        for j in range(0, 20):
-            # 如果成交量小于30万，则该股票跳过
-            vol = browser.find_element(By.XPATH,
-                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
-                                           j + 1) + ']/td[8]').text
-            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
-                j + 1) + ']/td[6]/span').text
-            if ((vol[-1] != '万') and (vol[-1] != '亿')):
-                continue
-            vol_t = float(vol[0:(len(vol) - 1)])
-            if (vol_t < key_vol):
-                continue
-            tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
-            stock_id = browser.find_element(By.XPATH, tr_url).text
-            if (change_rate == '-'):
-                continue
-            if (change_rate == '0.00%'):
-                break
-            list_ids_sz.append(stock_id)
-            print(stock_id)
-            print('今日涨幅：' + change_rate)
-            print('成交量：' + vol)
-            print('-----------------------------------------------------')
-        if (change_rate == '-'):
-            continue
-        if (change_rate == '0.00%'):
-            break
-        e = browser.find_element(By.LINK_TEXT, u'下一页')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-
-    # 获取北京股市股票ID
-    bj = browser.find_element(By.LINK_TEXT, u'北证A股')
-    browser.execute_script("arguments[0].click();", bj)
-    sleep(1)
-    page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
-    browser.execute_script("window.scrollTo(0,300)")
-    for i in range(1, page_count):
-        for j in range(0, 20):
-            # 如果成交量小于30万，则该股票跳过
-            vol = browser.find_element(By.XPATH,
-                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
-                                           j + 1) + ']/td[8]').text
-            change_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
-                j + 1) + ']/td[6]/span').text
-            if ((vol[-1] != '万') and (vol[-1] != '亿')):
-                continue
-            vol_t = float(vol[0:(len(vol) - 1)])
-            if (vol_t < key_vol):
-                continue
-            tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
-            stock_id = browser.find_element(By.XPATH, tr_url).text
-            if (change_rate == '-'):
-                continue
-            if (change_rate == '0.00%'):
-                break
-            list_ids_bj.append(stock_id)
-            print(stock_id)
-            print('今日涨幅：' + change_rate)
-            print('成交量：' + vol)
-            print('-----------------------------------------------------')
-        if (change_rate == '-'):
-            continue
-        if (change_rate == '0.00%'):
-            break
-        e = browser.find_element(By.LINK_TEXT, u'下一页')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-    list_ids.append(list_ids_sh)
-    list_ids.append(list_ids_sz)
-    list_ids.append(list_ids_bj)
+    for city_name in city_names:
+        list_ids.append(get_city_ids(city_name))
     return list_ids
+
+
+# 输入城市名称全拼（全小写），返回一个列表，里面是该城市满足条件的股票代码
+def get_city_ids(city_name):
+    list_city_ids = []
+    city_btn = ''
+    if (city_name == 'shanghai'):
+        city_btn = u'上证A股'
+    if (city_name == 'shenzhen'):
+        city_btn = u'深证A股'
+    if (city_name == 'beijing'):
+        city_btn = u'北证A股'
+    city = browser.find_element(By.LINK_TEXT, city_btn)
+    browser.execute_script("arguments[0].click();", city)
+    sleep(1)
+    page_count = int(browser.find_element(By.XPATH, '//*[@id="main-table_paginate"]/span[1]/a[5]').text)
+    browser.execute_script("window.scrollTo(0,300)")
+    for i in range(1, page_count):
+        for j in range(0, 20):
+            tr_url = '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[2]'
+            stock_id = browser.find_element(By.XPATH, tr_url).text
+            vol = browser.find_element(By.XPATH,
+                                       '/html/body/div[1]/div[2]/div[2]/div[5]/div/table/tbody/tr[' + str(
+                                           j + 1) + ']/td[8]').text
+            add_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
+                j + 1) + ']/td[6]/span').text
+            change_hand_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
+                j + 1) + ']/td[16]').text
+
+            # 如果成交量小于30万，则该股票跳过
+            if ((vol[-1] != '万') and (vol[-1] != '亿')):
+                continue
+            vol_t = float(vol[0:(len(vol) - 1)])
+            if (vol_t < key_vol):
+                continue
+
+            # 如果换手率小于3%，则该股票跳过
+            change_hand_rate_t = float(change_hand_rate[0:(len(change_hand_rate) - 1)])
+            if (change_hand_rate_t < key_change_hand_rate):
+                continue
+
+            # 判断今日是否上涨
+            if (add_rate == '-'):
+                continue
+            if (add_rate == '0.00%'):
+                break
+            list_city_ids.append(stock_id)
+            print(stock_id)
+            print('今日涨幅：' + add_rate)
+            print('成交量：' + vol)
+            print('换手率：' + change_hand_rate)
+            print('-----------------------------------------------------')
+        if ((add_rate == '0.00%') or (add_rate == '-')):
+            break
+        e = browser.find_element(By.LINK_TEXT, u'下一页')
+        browser.execute_script("arguments[0].click();", e)
+        sleep(1)
+    return list_city_ids
 
 
 def get_good_ids(list_ids):
@@ -219,12 +162,25 @@ def get_good_ids(list_ids):
     return list_final
 
 
+# 将列表数据写入txt文件
+def write_list_to_file(list):
+    # f = open(file_path, 'w')
+    # f.write('test')
+    # for i in list:
+    #     f.write(str(i) + '\n')
+    # f.close()
+    with open(file_path, 'w') as f:
+        f.write('test')
+
+
 if __name__ == '__main__':
-    list_good_ids = get_stock_ids(url, headers=headers)
-    # list_ids = [['600719', '600313', '601567', '601116', '603029', '603215', '600257', '688327', '600239', '688103'],
-    #             ['301292', '300780', '301192', '301016', '301398', '300879', '300270', '301298', '300817', '300189'],
-    #             ['871694', '831087', '836077', '838670', '430510', '834033', '873223', '836208', '832225', '832419']]
+    # list_good_ids = get_stock_ids(url)
+
+    list_ids = [['600719', '600313', '601567', '601116', '603029', '603215', '600257', '688327', '600239', '688103'],
+                ['301292', '300780', '301192', '301016', '301398', '300879', '300270', '301298', '300817', '300189'],
+                ['871694', '831087', '836077', '838670', '430510', '834033', '873223', '836208', '832225', '832419']]
     # list_good_ids = get_good_ids(list_ids)
+    write_list_to_file(list_ids)
     print('上交合格的票有' + str(len(list_good_ids[0])) + '支，它们是：')
     print(list_good_ids[0])
     print('深交所合格的票有' + str(len(list_good_ids[1])) + '支，它们是：')
