@@ -16,11 +16,12 @@ option = webdriver.EdgeOptions()
 option.add_argument(
     'user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36')
 browser = webdriver.Edge(options=option)
-browser.maximize_window()
+# browser.maximize_window()
 list_ids = []
 list_good_ids = []
 key_vol = 30
 key_change_hand_rate = 3
+key_vol_rate = 3
 city_names = ['shanghai', 'shenzhen', 'beijing']
 file_path = 'D://Stock.txt'
 
@@ -61,12 +62,18 @@ def get_city_ids(city_name):
                 j + 1) + ']/td[6]/span').text
             change_hand_rate = browser.find_element(By.XPATH, '//*[@id="table_wrapper-table"]/tbody/tr[' + str(
                 j + 1) + ']/td[16]').text
+            vol_rate = browser.find_element(By.XPATH,
+                                            '//*[@id="table_wrapper-table"]/tbody/tr[' + str(j + 1) + ']/td[15]').text
 
             # 如果成交量小于30万，则该股票跳过
             if ((vol[-1] != '万') and (vol[-1] != '亿')):
                 continue
             vol_t = float(vol[0:(len(vol) - 1)])
             if (vol_t < key_vol):
+                continue
+
+            # 量比大于3%
+            if ((vol_rate == '-') or (float(vol_rate) < key_vol_rate)):
                 continue
 
             # 如果换手率小于3%，则该股票跳过
@@ -84,6 +91,7 @@ def get_city_ids(city_name):
             print('今日涨幅：' + add_rate)
             print('成交量：' + vol)
             print('换手率：' + change_hand_rate)
+            print('量比：' + str(vol_rate) + '%')
             print('-----------------------------------------------------')
         if ((add_rate == '0.00%') or (add_rate == '-')):
             break
@@ -95,71 +103,45 @@ def get_city_ids(city_name):
 
 def get_good_ids(list_ids):
     list_final = []
-    list_ids_sh = list_ids[0]
-    list_ids_sz = list_ids[1]
-    list_ids_bj = list_ids[2]
-
-    for i in list_ids_sh:
-        browser.get("https://finance.sina.com.cn/realstock/company/sh" + str(i) + "/nc.shtml")
-        if (browser.find_element(By.ID, 'close_btn')):
-            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
-        wait = WebDriverWait(browser, 3)
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
-        browser.execute_script("window.scrollTo(0,300)")
-        e = browser.find_element(By.LINK_TEXT, u'日K')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-        list_final.append(i)
-
-    for i in list_ids_sz:
-        browser.get("https://finance.sina.com.cn/realstock/company/sz" + str(i) + "/nc.shtml")
-        if (browser.find_element(By.ID, 'close_btn')):
-            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
-        wait = WebDriverWait(browser, 3)
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
-        browser.execute_script("window.scrollTo(0,300)")
-        e = browser.find_element(By.LINK_TEXT, u'日K')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-        list_final.append(i)
-
-    for i in list_ids_bj:
-        browser.get("https://finance.sina.com.cn/realstock/company/bj" + str(i) + "/nc.shtml")
-        if (browser.find_element(By.ID, 'close_btn')):
-            browser.execute_script("arguments[0].click();", browser.find_element(By.ID, 'close_btn'))
-        wait = WebDriverWait(browser, 3)
-        wait.until(EC.presence_of_element_located(
-            (By.XPATH, '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')))
-        browser.execute_script("window.scrollTo(0,300)")
-        e = browser.find_element(By.LINK_TEXT, u'日K')
-        browser.execute_script("arguments[0].click();", e)
-        sleep(1)
-        list_final.append(i)
-        # 判断MACD两天之内是否出现金叉
-        # dif_0 = browser.find_element(By.XPATH,
-        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
-        # dif_0 = float(dif_0[5:])
-        # dea_0 = browser.find_element(By.XPATH,
-        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
-        # dea_0 = float(dea_0[5:])
-        # vol_map = browser.find_element(By.XPATH,
-        #                                '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[4]')
-        # vol_map_width = vol_map.size.get("width")
-        # vol_map_x = vol_map.location.get('x')
-        # vol_map_y = vol_map.location.get('y')
-        # vol_map_right = vol_map_x + vol_map_width
-        # dif_1 = browser.find_element(By.XPATH,
-        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
-        # dif_1 = float(dif_1[5:])
-        # dea_1 = browser.find_element(By.XPATH,
-        #                              '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
-        # dea_1 = float(dea_1[5:])
-        # browser.execute_script("arguments[0].scrollIntoView();", browser.find_element(By.XPATH,
-        #                                                                               '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[1]/canvas[3]'))
-        # ActionChains(browser).move_to_element(vol_map)
+    n = 0
+    for list_city in list_ids:
+        if (list_ids.index(list_city) == 0):
+            city = 'sh'
+        elif (list_ids.index(list_city) == 1):
+            city = 'sz'
+        else:
+            city = 'bj'
+        for i in list_city:
+            n += 1
+            print('正在检查第' + str(n) + '支股票——' + i)
+            if ((get_key_from_url(
+                    "https://finance.sina.com.cn/realstock/company/" + city + i + "/nc.shtml") == True) and (
+                    len(i) != 0)):
+                list_final.append(i)
     return list_final
+
+
+# 从一个已知的url获取所有符合条件的股票代码，返回一个布尔值：
+def get_key_from_url(url):
+    browser.get(url)
+    wait = WebDriverWait(browser, 3)
+    wait.until(EC.presence_of_element_located(
+        (By.XPATH, '/html/body/div[8]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]')))
+    browser.execute_script("window.scrollTo(0,300)")
+    e = browser.find_element(By.LINK_TEXT, u'日K')
+    browser.execute_script("arguments[0].click();", e)
+    sleep(1)
+
+    dif_0 = browser.find_element(By.XPATH,
+                                 '/html/body/div[8]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[1]').text
+    dif_0 = float(dif_0[5:])
+    dea_0 = browser.find_element(By.XPATH,
+                                 '/html/body/div[8]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[3]/div/div[2]/div[2]/div[1]/div[3]/div[2]/span[2]').text
+    dea_0 = float(dea_0[5:])
+    if ((abs(dif_0 - dea_0) < 0.03) and (dif_0 < 0) and (dea_0 < 0)):
+        return True
+    else:
+        return False
 
 
 # 将列表数据写入txt文件
@@ -167,20 +149,22 @@ def write_list_to_file(list):
     with open(file_path, 'w') as f:
         for i in list:
             f.write(str(i) + '\n')
+    print('今日符合条件的股票代码已经写入' + file_path + '中。')
 
 
 if __name__ == '__main__':
-    list_good_ids = get_stock_ids(url)
+    list_ids = get_stock_ids(url)
+    # total = 0
+    # for i in list_ids:
+    #     print(i)
+    #     total += len(i)
+    # print('------------------------------------')
+    # print(total)
+    # print('------------------------------------')
     # list_ids = [['600719', '600313', '601567', '601116', '603029', '603215', '600257', '688327', '600239', '688103'],
     #             ['301292', '300780', '301192', '301016', '301398', '300879', '300270', '301298', '300817', '300189'],
     #             ['871694', '831087', '836077', '838670', '430510', '834033', '873223', '836208', '832225', '832419']]
     # list_good_ids = get_good_ids(list_ids)
-    write_list_to_file(list_ids)
-    print('今日符合条件的股票代码已经写入' + file_path + '中。')
-    # print('上交所合格的票有' + str(len(list_good_ids[0])) + '支，它们是：')
-    # print(list_good_ids[0])
-    # print('深交所合格的票有' + str(len(list_good_ids[1])) + '支，它们是：')
-    # print(list_good_ids[1])
-    # print('北交所合格的票有' + str(len(list_good_ids[2])) + '支，它们是：')
-    # print(list_good_ids[2])
-    # print('今天合格的股票共有' + str(len(list_good_ids[0]) + len(list_good_ids[1]) + len(list_good_ids[2])) + '支')
+    # write_list_to_file(list_ids)
+    print('共有' + str(len(list_ids[0]) + len(list_ids[1]) + len(list_ids[2])) + '支股票符合条件，他们是：')
+    print(list_ids)
